@@ -1,0 +1,15 @@
+..\output\queue.o: ..\system\queue.c
+..\output\queue.o: C:\Kei5\ARM\ARMCC\Bin\..\include\stdlib.h
+..\output\queue.o: C:\Kei5\ARM\ARMCC\Bin\..\include\string.h
+..\output\queue.o: ..\system\include\FreeRTOS.h
+..\output\queue.o: C:\Kei5\ARM\ARMCC\Bin\..\include\stddef.h
+..\output\queue.o: C:\Kei5\ARM\ARMCC\Bin\..\include\stdint.h
+..\output\queue.o: ..\user\FreeRTOSConfig.h
+..\output\queue.o: ..\system\include\projdefs.h
+..\output\queue.o: ..\system\include\portable.h
+..\output\queue.o: ..\system\include\deprecated_definitions.h
+..\output\queue.o: ..\system\portable\RVDS\ARM_CM4F\portmacro.h
+..\output\queue.o: ..\system\include\mpu_wrappers.h
+..\output\queue.o: ..\system\include\task.h
+..\output\queue.o: ..\system\include\list.h
+..\output\queue.o: ..\system\include\queue.h

@@ -1,0 +1,16 @@
+..\output\tasks.o: ..\system\tasks.c
+..\output\tasks.o: C:\Kei5\ARM\ARMCC\Bin\..\include\stdlib.h
+..\output\tasks.o: C:\Kei5\ARM\ARMCC\Bin\..\include\string.h
+..\output\tasks.o: ..\system\include\FreeRTOS.h
+..\output\tasks.o: C:\Kei5\ARM\ARMCC\Bin\..\include\stddef.h
+..\output\tasks.o: C:\Kei5\ARM\ARMCC\Bin\..\include\stdint.h
+..\output\tasks.o: ..\user\FreeRTOSConfig.h
+..\output\tasks.o: ..\system\include\projdefs.h
+..\output\tasks.o: ..\system\include\portable.h
+..\output\tasks.o: ..\system\include\deprecated_definitions.h
+..\output\tasks.o: ..\system\portable\RVDS\ARM_CM4F\portmacro.h
+..\output\tasks.o: ..\system\include\mpu_wrappers.h
+..\output\tasks.o: ..\system\include\task.h
+..\output\tasks.o: ..\system\include\list.h
+..\output\tasks.o: ..\system\include\timers.h
+..\output\tasks.o: ..\system\include\StackMacros.h
