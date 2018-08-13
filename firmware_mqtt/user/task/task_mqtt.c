@@ -18,7 +18,7 @@ void osTaskMqt(void *pParameters)
     static volatile TickType_t currentTime;
     static bool flagMqttRunning = true;
     static uint32_t  connectTryTimes = 0;
-    static const uint32_t connectTryTimesMax = 600; //! about 10 minutes
+    static const uint32_t connectTryTimesMax = 300; //! about 10 minutes
     static uint32_t dhcpTryTimes = 0;
     const static uint32_t dhcpTryTimesMax = 500000;
     static uint32_t dnsTryTimes = 0;
@@ -145,7 +145,7 @@ void osTaskMqt(void *pParameters)
                 
                 } else {
                     transport_close();
-                    vTaskDelay(2000);
+                    vTaskDelay(1000);
                     mqtt_state = MQTT_MODE_CONNECT;
                 }
                 break;
