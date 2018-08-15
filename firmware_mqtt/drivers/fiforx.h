@@ -11,7 +11,7 @@
 
 
 //! fifo buffer size, should be n^2 value 
-#define FIFO_RX_BUF_SIZE	16384 //! 16K
+#define FIFO_RX_BUF_SIZE	16384 //! 16K 最大只能定义16K
 #define FIFO_RX_BUF_MASK	FIFO_RX_BUF_SIZE - 1
 
 #define OVREFLOW_FLAG_RX2	0x01

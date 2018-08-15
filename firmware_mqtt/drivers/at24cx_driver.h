@@ -47,7 +47,6 @@ bool i2cCheckDevice(void);
 void i2cEepromInit(void);
 bool eepromAT24CXCheck(void);
 void eepromGetSysParameter(void);
-bool eepromSetSysParaDefault(void);
 bool eepromReadBytes(uint8_t* buf, uint16_t addr, uint16_t size);
 bool eepromWriteBytes(uint8_t* buf, uint16_t addr, uint16_t size);
 

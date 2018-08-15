@@ -39,7 +39,7 @@ void usart4Init(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(USART4_GPIO, &GPIO_InitStructure);
 	
-	USART_InitStructure.USART_BaudRate = 115200;
+	USART_InitStructure.USART_BaudRate = 921600;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;

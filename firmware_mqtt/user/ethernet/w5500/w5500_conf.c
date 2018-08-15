@@ -140,6 +140,7 @@ void w5500SetIP(void)
 void w5500Init(void)
 {
 	w5500GpioConfig();
+    //read_lnet_info_from_eeprom(&gEepromLnet);
 	w5500Reset();
 	w5500SetMAC();
 

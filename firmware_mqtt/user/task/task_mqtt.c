@@ -18,7 +18,7 @@ void osTaskMqt(void *pParameters)
     static volatile TickType_t currentTime;
     static bool flagMqttRunning = true;
     static uint32_t  connectTryTimes = 0;
-    static const uint32_t connectTryTimesMax = 300; //! about 10 minutes
+    static const uint32_t connectTryTimesMax = 240; //! about 4 minutes
     static uint32_t dhcpTryTimes = 0;
     const static uint32_t dhcpTryTimesMax = 500000;
     static uint32_t dnsTryTimes = 0;
@@ -26,7 +26,7 @@ void osTaskMqt(void *pParameters)
     static uint8_t wait_connect_ack_times = 0;  
     uint8_t serial_data;
     mqtt_message_t serial_msg;
-    static char MQTT_CLIENT_ID[31] = {"HXGKAA"}; //! 最后一个字节作结束符
+    static char MQTT_CLIENT_ID[31] = {"HXGKCC"}; //! 最后一个字节作结束符
     static uint8_t client_id[12];
 
     while(1) {
@@ -139,10 +139,12 @@ void osTaskMqt(void *pParameters)
                     mqtt_state = MQTT_MODE_SUBSCRIBE;
                     break;
 
-                } else if (connectTryTimes++ > connectTryTimesMax) {
-                    connectTryTimes = 0;
+                } else if (connectTryTimes++ == connectTryTimesMax) { //! w5500 reinit per 4 minutes while connect failed
                     mqtt_state = MQTT_MODE_ETHREBOOT;
                 
+                } else if (connectTryTimes > connectTryTimesMax+1) {
+                    systemReboot();
+                    
                 } else {
                     transport_close();
                     vTaskDelay(1000);
@@ -227,17 +229,14 @@ void osTaskMqt(void *pParameters)
                 
                 //! data from serial to mqtt
                 while (fifoGetBufDataCount()) {
-                    vTaskSuspendAll();
                     fifoPopBuf(&serial_data, 1);
                     
                     if (msg_serial_parser(&serial_msg, serial_data)) {
                         handleSerialMessage(&serial_msg);
-                        xTaskResumeAll();
                     }
                 }
                 
-                //! data from mqtt to serial                
-                
+                //! data from mqtt to serial                                
                 mqtt_get_message(&flagMqttRunning);
                 if (flagMqttRunning == false) {
                     flagMqttRunning = true;

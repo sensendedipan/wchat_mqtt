@@ -8,7 +8,7 @@
 //#define MQTT_DEBUG
 
 #define MQTT_RX_BUF_SIZE 1024
-#define	MQTT_TX_BUF_SIZE 512
+#define	MQTT_TX_BUF_SIZE 1024
 
        
 
@@ -339,15 +339,18 @@ void mqtt_get_message(bool* state)
 {    
     static uint32_t timeout;
     
-    if (getSn_SR(SOCK_TCPS) != SOCK_ESTABLISHED) { //! tcp un_established unexpectly 
-        debug("socket error : %02X \n", getSn_SR(SOCK_TCPS));        
-        *state = false; 
-        return;
+    if (getSn_SR(SOCK_TCPS) != SOCK_ESTABLISHED) { //! tcp un_established unexpectly
+        uint8_t rc = getSn_SR(SOCK_TCPS);          //! confirm again
+        if (rc != SOCK_ESTABLISHED) {
+            debug("socket error : %02X \n", rc);        
+            *state = false; 
+            return;            
+        }
     }   
     
     uint16_t len = getSn_RX_RSR(SOCK_TCPS);
 
-    if (len > 8096) {  //! something wrong
+    if (len > 8192) {  //! something wrong
         debug("len outside error %d \n", len);
         timeout = 0;
         *state = false;      
@@ -356,7 +359,13 @@ void mqtt_get_message(bool* state)
         vTaskSuspendAll();
         timeout = 0;
         recv(SOCK_TCPS, mqttDataBuf, len);
-        fifoRxPushBuf(mqttDataBuf, len);
+        if ((FIFO_RX_BUF_SIZE - fifoRxGetBufDataCount()) > (len + 1)) {
+            fifoRxPushBuf(mqttDataBuf, len);
+            
+        } else {
+            memset(mqttDataBuf, 0, sizeof(mqttDataBuf)); 
+            debug("fifo_rx_buf full ... \n");
+        }
         xTaskResumeAll();     
     
     } else {

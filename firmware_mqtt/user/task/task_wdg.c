@@ -47,14 +47,17 @@ void osTaskDog(void *pParameters)
                     break;
                 
                 case STATE_DHCP:
+                    debug("achieve ip from dhcp server... \n");
                     ledFlashSet(0, 3, 50, 150); //! 
                     break;
                 
                 case STATE_DNS:
+                    debug("achieve ip from dns server... \n");
                     ledFlashSet(0, 3, 50, 150); //! 
                     break;
 
                 case STATE_CONNECT:
+                    debug("try to connect to mqtt server... \n");
                     ledFlashSet(0, 2, 50, 150); //! 
                     break;
 
@@ -67,7 +70,7 @@ void osTaskDog(void *pParameters)
                     break;
             }                              
 
-        } else if (xTaskGetTickCount() > 0XEFFFFFFF) {  //! 时间溢出
+        } else if (xTaskGetTickCount() > 0X240C8400) {  //! 每周重启一次
             systemReboot(); 
         }
 
@@ -76,14 +79,15 @@ void osTaskDog(void *pParameters)
             wdgFeed(); //!	feed dog 
             
             //! check w5500 phy link state at 1Hz
-            gFw5500LinkState = w5500CheckLink();                            
+            gFw5500LinkState = w5500CheckLink(); 
         }            
 
         uint16_t rc = fifoRxGetBufDataCount();
 
         vTaskSuspendAll();
-        if (rc > sizeof(buf_read_fifo)) {
-            debug("buf_read_fifo_rx outside: %d  \n", rc);
+        if (rc > FIFO_RX_BUF_SIZE-1) debug("buf_read_fifo_rx outside: %d  \n", rc);
+        
+        if (rc > sizeof(buf_read_fifo)) {            
             fifoRxPopBuf(buf_read_fifo, sizeof(buf_read_fifo));
             usart1SendBuffer(buf_read_fifo, sizeof(buf_read_fifo)); 
             ledFlashSet(0, 1, 10, 10);

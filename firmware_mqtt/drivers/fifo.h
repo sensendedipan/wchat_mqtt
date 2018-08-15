@@ -11,7 +11,7 @@
 
 
 //! fifo buffer size, should be n^2 value 
-#define FIFO_BUF_SIZE	8096 //! 8K
+#define FIFO_BUF_SIZE	4096 //! 4K
 #define FIFO_BUF_MASK	FIFO_BUF_SIZE - 1
 
 #define OVREFLOW_FLAG1	0x01

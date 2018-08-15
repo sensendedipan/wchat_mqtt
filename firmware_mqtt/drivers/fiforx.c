@@ -6,8 +6,9 @@
 
 
 static uint8_t buf_flags;
-static uint8_t buffer[FIFO_RX_BUF_SIZE];
 static uint16_t in_index, out_index;
+static uint8_t buffer[FIFO_RX_BUF_SIZE];
+
 
 
 

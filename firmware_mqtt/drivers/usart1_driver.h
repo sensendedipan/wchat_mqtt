@@ -41,8 +41,8 @@ void usart1SendString(const uint8_t *s);
 #define DMA_FLAG_TCIF               DMA_FLAG_TCIF2
 
 
-#define DMA_RX_BUFFER_SIZE          4096  //! 4K
-#define DMA_TX_BUFFER_SIZE          1024
+#define DMA_RX_BUFFER_SIZE          2048  //! 2K
+
 
 
 void usart1DmaSendBuffer(const uint8_t *buffer, uint16_t count);

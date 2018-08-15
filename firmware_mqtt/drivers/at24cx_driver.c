@@ -188,7 +188,7 @@ void eepromGetSysParameter(void)
 {         
     //! get login info
     read_lgi_info_from_eeprom(&gEepromLgi);
-    delay_ms(10);
+    delay_ms(20);
     
     if ((gEepromLgi.start != EE_VALID)||(gEepromLgi.checksum != crc16(&gEepromLgi.start, sizeof(eeprom_lgi_t)-2))) {
         gEepromLgi.start = EE_VALID;
@@ -198,7 +198,7 @@ void eepromGetSysParameter(void)
         memcpy(gEepromLgi.newusr, EE_DEFAULT_LGI_NEW_USR, sizeof(gEepromLgi.newusr));
         memcpy(gEepromLgi.valpsd, EE_DEFAULT_LGI_VAL_PSD, sizeof(gEepromLgi.valpsd));
         write_lgi_info_to_eeprom(gEepromLgi);
-        delay_ms(10);
+        delay_ms(20);
     }
 #ifdef DEBUG_EEPROM
     printf("login: newusr:  ");
@@ -225,7 +225,7 @@ void eepromGetSysParameter(void)
 
     //! get mqtt info
     read_mqtt_info_from_eeprom(&gEepromMqtt);
-    delay_ms(10);
+    delay_ms(20);
     if ((gEepromMqtt.start != EE_VALID)||(gEepromMqtt.checksum != crc16(&gEepromMqtt.start, sizeof(eeprom_mqtt_t)-2))||(gEepromMqtt.dns > 1)) {
         gEepromMqtt.start = EE_VALID;
         memcpy(gEepromMqtt.ip, EE_DEFAULT_MQTT_IP, sizeof(gEepromMqtt.ip));
@@ -234,7 +234,7 @@ void eepromGetSysParameter(void)
         gEepromMqtt.port = EE_DEFAULT_MQTT_PORT;
         gEepromMqtt.dns  = DNS_DISABLE;   
         write_mqtt_info_to_eeprom(gEepromMqtt);
-        delay_ms(10);        
+        delay_ms(20);        
     }
 #ifdef DEBUG_EEPROM
     printf("\n\n");
@@ -254,13 +254,13 @@ void eepromGetSysParameter(void)
 
     //! get mqtt login info 
     read_mlgi_info_from_eeprom(&gEepromMlgi);
-    delay_ms(10);
+    delay_ms(20);
     if ((gEepromMlgi.start != EE_VALID)||(gEepromMlgi.checksum != crc16(&gEepromMlgi.start, sizeof(eeprom_mlgi_t)-2))) {
         gEepromMlgi.start = EE_VALID;
         memcpy(gEepromMlgi.usr,EE_DEFAULT_MQTT_USR,sizeof(gEepromMlgi.usr));
         memcpy(gEepromMlgi.psd,EE_DEFAULT_MQTT_PSD,sizeof(gEepromMlgi.psd));
         write_mlgi_info_to_eeprom(gEepromMlgi);
-        delay_ms(10);        
+        delay_ms(20);        
     }  
 #ifdef DEBUG_EEPROM
     printf("\n\n");
@@ -277,7 +277,7 @@ void eepromGetSysParameter(void)
     
     //! get lnet info
     read_lnet_info_from_eeprom(&gEepromLnet);
-    delay_ms(10);
+    delay_ms(20);
     if ((gEepromLnet.start != EE_VALID)||(gEepromLnet.checksum != crc16(&gEepromLnet.start, sizeof(eeprom_lnet_t)-2))) {
         gEepromLnet.start = EE_VALID; 
         memcpy(gEepromLnet.ip,  EE_DEFAULT_LNET_IP,  sizeof(gEepromLnet.ip));
@@ -288,54 +288,18 @@ void eepromGetSysParameter(void)
         gEepromLnet.baud = EE_DEFAULT_MQTT_BAUD;
         gEepromLnet.dhcp = IP_STATIC; //! static ip
         write_lnet_info_to_eeprom(gEepromLnet);
-        delay_ms(10);        
+        delay_ms(20);        
     }
 #ifdef DEBUG_EEPROM
-    printf("\n\n");
-    printf("lnet: ip:   ");
-    for (uint8_t i = 0; i < sizeof(gEepromLnet.ip); i++) {
-        printf("%d. ", gEepromLnet.ip[i]);
-    } printf("\n");
-    
-    printf("lnet: sub:  ");
-    for (uint8_t i = 0; i < sizeof(gEepromLnet.sub); i++) {
-        printf("%d. ", gEepromLnet.sub[i]);
-    } printf("\n");
-    
-    printf("lnet: gay:  ");
-    for (uint8_t i = 0; i < sizeof(gEepromLnet.gay); i++) {
-        printf("%d. ", gEepromLnet.gay[i]);
-    } printf("\n");
-
-    printf("lnet: dns:  ");
-    for (uint8_t i = 0; i < sizeof(gEepromLnet.dns); i++) {
-        printf("%d. ", gEepromLnet.dns[i]);
-    } printf("\n");    
+    printf("lnet: ip:   %d.%d.%d.%d  \n", gEepromLnet.ip[0],  gEepromLnet.ip[1],  gEepromLnet.ip[2],  gEepromLnet.ip[3]);    
+    printf("lnet: sub:  %d.%d.%d.%d  \n", gEepromLnet.sub[0], gEepromLnet.sub[1], gEepromLnet.sub[2], gEepromLnet.sub[3]);    
+    printf("lnet: gay:  %d.%d.%d.%d  \n", gEepromLnet.gay[0], gEepromLnet.gay[1], gEepromLnet.gay[2], gEepromLnet.gay[3]);
+    printf("lnet: dns:  %d.%d.%d.%d  \n", gEepromLnet.dns[0], gEepromLnet.dns[1], gEepromLnet.dns[2], gEepromLnet.dns[3]);    
 #endif
         
 }
 
 
-
-//! 原意主要是对参数的操作
-bool eepromSetSysParaDefault(void)
-{
-    static eeprom_lgi_t  r_lgi;
-
-    //! set login info
-    gEepromLgi.start = EE_VALID;
-    memcpy(gEepromLgi.oldusr, EE_DEFAULT_LGI_OLD_USR, sizeof(gEepromLgi.oldusr));
-    memcpy(gEepromLgi.oldpsd, EE_DEFAULT_LGI_OLD_PSD, sizeof(gEepromLgi.oldpsd));
-    memcpy(gEepromLgi.newpsd, EE_DEFAULT_LGI_NEW_PSD, sizeof(gEepromLgi.newpsd));
-    memcpy(gEepromLgi.newusr, EE_DEFAULT_LGI_NEW_USR, sizeof(gEepromLgi.newusr));
-    memcpy(gEepromLgi.valpsd, EE_DEFAULT_LGI_VAL_PSD, sizeof(gEepromLgi.valpsd));
-    write_lgi_info_to_eeprom(gEepromLgi);
-    vTaskDelay(5);
-    read_lgi_info_from_eeprom(&r_lgi);
-    if (r_lgi.checksum != crc16(&r_lgi.start, sizeof(eeprom_lgi_t)-2)) return false;
-
-    return true;
-}
 
 
 
