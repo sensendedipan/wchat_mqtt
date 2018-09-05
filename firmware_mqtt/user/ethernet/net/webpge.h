@@ -68,7 +68,6 @@
 "<style> "\
 "input[type='text'] {width:120px;}"\
 "input[type='textn']{width:149px;}"\
-"input[type='textg']{width:200px;}"\
 "input[type='textl']{width:240px;}"\
 "body{background-color:transparent;}"\
 "body,h3,p,div{margin:0;padding:0;font: normal 15px 'omnes-pro', Helvetica, Arial, sans-serif;} "\
@@ -254,10 +253,8 @@
 "req.send(body); "\
 "};"\
 "};"\
-"function $(id)  {return document.getElementById(id);}"\
+"function $(id) {return document.getElementById(id);}"\
 "function $$(id){return document.getElementsByName(id);}"\
-"function G(id){return $(id).style.color='green';} "\
-"function R(id){return $(id).style.color='red';} "\
 "function $$_ie(tag, name){"\
 "if(!tag){tag='*';}"\
 "var elems=document.getElementsByTagName(tag);"\
@@ -387,7 +384,7 @@
 "<div class='usual'>"\
 "<ul id='tabs'> "\
 "<li><a href='#NetSettings'   tabid='#tabs1' accesskey='1' onkeyup='DoUpSysdata();'>网络设置 </a></li> "\
-"<li><a href='#AdminSetting'  tabid='#tabs2' accesskey='2'>管理员设置</a></li> "\
+"<li><a href='#AdminSetting'  tabid='#tabs2' accesskey='2'>账户设置</a></li> "\
 "</ul>"\
 "<div id='tabs1' class='show'> "\
 "<form id='frmParam' method='POST' action='config.cgi'> "\
@@ -403,7 +400,7 @@
 "<p><label>波特率:	 </label><input id='txtbaud' name='baud' type='textn' size='25' maxlength = '10'value='8000000' /></p>"\
 "</fieldset><br>"\
 "<fieldset class='fieldset'>"\
-"<legend>远程服务器网络参数</legend>"\
+"<legend>服务器网络参数</legend>"\
 "<p><label></label>"\
 "<input name='DomainName' type='radio' id='DomainName'  value='1' onclick='netinfo_DomainName(this.value);'/>服务器域名&nbsp; &nbsp; "\
 "<input name='DomainName' type='radio' id='DomainNameIP'value='0' onclick='netinfo_DomainName(this.value);'/>服务器IP"\
@@ -422,7 +419,7 @@
 "<form id='adminParam' method='post' action='admin.cgi'> "\
 "<div class='ipt'> "\
 "<fieldset class='fieldset'>"\
-"<legend>用户信息管理</legend>"\
+"<legend>账户管理</legend>"\
 "<p><label>用户信息管理</label>"\
 "<select style='height:21px;width:185px;' id='select' name='select' >"\
 "<option value='0'>设备管理员</option>"\

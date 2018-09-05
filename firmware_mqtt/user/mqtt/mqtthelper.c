@@ -135,8 +135,6 @@ bool mqtt_connect(char* client_id, char* user, char* password)
     static char psd[7] = {0};
     int buflen = sizeof(mqttTXBuf);
     memset(mqttTXBuf, 0, buflen);
-    static uint8_t connect_req_times = 0;
-    const static uint8_t connect_req_max = 5;
     memcpy(usr, user, 6); 
     memcpy(psd, password, 6);
 
@@ -149,27 +147,13 @@ bool mqtt_connect(char* client_id, char* user, char* password)
     data.password.cstring = psd;
 
     if (transport_open() == false) {
-        connect_req_times = 0;
         return false;
     } 
     
-    while(connect_req_times++ < connect_req_max) { 
+    len = MQTTSerialize_connect(mqttTXBuf, buflen, &data);        
 
-        len = MQTTSerialize_connect(mqttTXBuf, buflen, &data);        
-        bool result = transport_sendPacketBuffer(mqttTXBuf, len); 
-        
-        if (result == false) {
-            vTaskDelay(1);
-            
-        } else {
-            connect_req_times = 0;
-            break;
-        }
-        
-        if (connect_req_times >= (connect_req_max-1)) {
-            connect_req_times = 0;          
-            return false;
-        }
+    if (transport_sendPacketBuffer(mqttTXBuf, len) == false) {
+        return false;
     }
 
     //! wait for connack
@@ -328,7 +312,6 @@ bool mqtt_subscrib(char* pTopic, int qos)
 
 
 
-
 /**
 *@name     mqtt_get_message()
 *@brief	   
@@ -338,41 +321,45 @@ bool mqtt_subscrib(char* pTopic, int qos)
 void mqtt_get_message(bool* state)
 {    
     static uint32_t timeout;
-    
-    if (getSn_SR(SOCK_TCPS) != SOCK_ESTABLISHED) { //! tcp un_established unexpectly
-        uint8_t rc = getSn_SR(SOCK_TCPS);          //! confirm again
-        if (rc != SOCK_ESTABLISHED) {
-            debug("socket error : %02X \n", rc);        
+    uint8_t rc = getSn_SR(SOCK_TCPS);
+
+    if (rc != SOCK_ESTABLISHED) { //! tcp un_established unexpectly
+        rc = getSn_SR(SOCK_TCPS);          
+        if (rc != SOCK_ESTABLISHED) { //! confirm again
+            debug("socket error : %02X \n", rc); 
             *state = false; 
-            return;            
+            return;                
         }
-    }   
+        
+    } else {
+        if(getSn_IR(SOCK_TCPS) & Sn_IR_CON) {
+            setSn_IR(SOCK_TCPS, Sn_IR_CON); 
+        }
+    }        
     
     uint16_t len = getSn_RX_RSR(SOCK_TCPS);
 
-    if (len > 8192) {  //! something wrong
-        debug("len outside error %d \n", len);
-        timeout = 0;
-        *state = false;      
-        
-    } else if (len > 0) {
+    if (len > 0) { 
+        if (len >= 8192) debug("w5500 socket buf full : %d \n", len);
+
         vTaskSuspendAll();
         timeout = 0;
         recv(SOCK_TCPS, mqttDataBuf, len);
-        if ((FIFO_RX_BUF_SIZE - fifoRxGetBufDataCount()) > (len + 1)) {
+        if ((len + fifoRxGetBufDataCount()) <= FIFO_RX_BUF_SIZE) {
             fifoRxPushBuf(mqttDataBuf, len);
-            
+
         } else {
-            memset(mqttDataBuf, 0, sizeof(mqttDataBuf)); 
-            debug("fifo_rx_buf full ... \n");
+            fifoRxPushBuf(mqttDataBuf, FIFO_RX_BUF_SIZE - fifoRxGetBufDataCount());            
+            debug("fifo_rx_buf full ...%d  %d \n", FIFO_RX_BUF_SIZE - fifoRxGetBufDataCount(), len);
         }
+        
         xTaskResumeAll();     
     
     } else {
-        if (timeout++ > 5000) {
-            debug("tcp no data within 5s \n");
+        if (timeout++ > 1000) {
+            debug("tcp no data end   within 5s socket state: %02X \n", rc);
             timeout = 0;
-            *state = false;
+            *state = false;            
         }
     }        
 }
@@ -397,14 +384,6 @@ bool mqtt_pingreq(void)
     return transport_sendPacketBuffer(mqttTXBuf, temp);    
 }
 
-
-
-bool mqtt_puback(unsigned short packetid)
-{
-    int buflen = sizeof(mqttTXBuf);
-    int temp = MQTTSerialize_puback(mqttTXBuf, buflen, packetid);
-    return transport_sendPacketBuffer(mqttTXBuf, temp);
-}
 
 
 

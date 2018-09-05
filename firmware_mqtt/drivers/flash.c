@@ -64,7 +64,7 @@ bool getDevMac(uint8_t *mac)
         mac_t = crc32(str, sizeof(str));
         
 		*mac	    = 0X4C; 
-		*(mac+1)	= 0X18; 
+		*(mac+1)	= 0X00; 
 		*(mac+2)	= (uint8_t)(mac_t >> 24);
 		*(mac+3)	= (uint8_t)(mac_t >> 16);
 		*(mac+4)	= (uint8_t)(mac_t >>  8);

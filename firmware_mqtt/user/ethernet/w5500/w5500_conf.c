@@ -148,9 +148,7 @@ void w5500Init(void)
         w5500SetIP();
 	}
 	
-	socket_buf_init(txsize, rxsize);
- 	setRTR(2000);  
-    setRCR(3);   
+	socket_buf_init(txsize, rxsize);   
 }
 
 

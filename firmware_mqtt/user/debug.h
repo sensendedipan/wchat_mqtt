@@ -6,7 +6,7 @@
 #define DEBUG
 
 #ifdef  DEBUG   
-	#define debug(fmt, args...)		        printf("apple: "fmt, ##args)
+	#define debug(fmt, args...)		        printf("\napple: "fmt, ##args)
     
 	#define debugPrintf(fmt,args...)   	    printf(fmt"----[file name = %s  line num = %d]",__FILE__,__LINE__,##args)		
 	#define debugLogInfo(fmt, args...)		printf("INFO: "fmt, ##args)

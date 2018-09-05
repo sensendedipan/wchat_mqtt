@@ -9,13 +9,15 @@
 #include "message.h"
 #include "dns.h"
 
-extern uint8_t run_state;
 
+
+uint8_t run_state = STATE_PHY;
 
 void osTaskMqt(void *pParameters)
 {
     static mqtt_mode_t mqtt_state = MQTT_MODE_IDLE;
     static volatile TickType_t currentTime;
+    static volatile TickType_t currentTimeCheckPhy;
     static bool flagMqttRunning = true;
     static uint32_t  connectTryTimes = 0;
     static const uint32_t connectTryTimesMax = 240; //! about 4 minutes
@@ -28,8 +30,15 @@ void osTaskMqt(void *pParameters)
     mqtt_message_t serial_msg;
     static char MQTT_CLIENT_ID[31] = {"HXGKCC"}; //! 最后一个字节作结束符
     static uint8_t client_id[12];
-
+    
     while(1) {
+
+        //!  check phy link state per 4s
+        if (xTaskGetTickCount() - currentTimeCheckPhy >= 2000) { 
+            currentTimeCheckPhy = xTaskGetTickCount(); 
+            
+            gFw5500LinkState = w5500CheckLink();
+        }        
         
         switch (mqtt_state) { 
             case MQTT_MODE_IDLE:
@@ -48,21 +57,24 @@ void osTaskMqt(void *pParameters)
 
             case MQTT_MODE_PHY: 
                 run_state = STATE_PHY;
+                debug("mqtt task: checking phy linking... \n");
+                gFw5500LinkState = w5500CheckLink();
                 if (gFw5500LinkState == true) { 
                     mqtt_state = MQTT_MODE_DHCP; 
                     
                 } else {
-                    printf("apple: phy offline STATE_PHY\n");
-                    vTaskDelay(5000);
+                    debug("phy offline STATE_PHY\n");
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                 }                
                 break;
             
             case MQTT_MODE_DHCP:  //! 
                 run_state = STATE_DHCP;
+                debug("mqtt task: get ip from dhcp server or eeprom... \n");
+            
                 if (gFw5500LinkState == false) {  //! 时刻检测网线状态
-                    printf("apple: phy offline STATE_DHCP\n");
-                    vTaskDelay(5000);
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                     break;
                     
@@ -84,7 +96,7 @@ void osTaskMqt(void *pParameters)
                             systemReboot();
                         
                         } else {
-                            vTaskDelay(200);
+                            vTaskDelay(100);
                             mqtt_state = MQTT_MODE_DHCP;
                         }
                     }
@@ -95,10 +107,11 @@ void osTaskMqt(void *pParameters)
                 break;
 
             case MQTT_MODE_DNS:
-                run_state = STATE_DNS; 
-                if (gFw5500LinkState == false) {  //! 时刻检测网线状态
-                    printf("apple: phy offline STATE_DNS\n");                    
-                    vTaskDelay(5000);
+                run_state = STATE_DNS;
+                debug("mqtt task: get dns from dns server... \n");   
+            
+                if (gFw5500LinkState == false) {  //! 时刻检测网线状态                    
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                     break;                    
                 }
@@ -126,16 +139,17 @@ void osTaskMqt(void *pParameters)
                 break;
  
             case MQTT_MODE_CONNECT:
-                run_state = STATE_CONNECT;           
+                run_state = STATE_CONNECT;
+                debug("mqtt task: try to connect to mqtt server... \n");
+            
                 if (gFw5500LinkState == false) {  //! 时刻检测网线状态
-                    printf("apple: phy offline STATE_CONNECT\n");
-                    vTaskDelay(5000);
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                     break;                    
                 } 
-                
+
                 if (mqtt_connect(MQTT_CLIENT_ID, (char*)gEepromMlgi.usr, (char*)gEepromMlgi.psd) == true) { //! 链接已经建立，跳转到RUNNING模式
-                    connectTryTimes = 0;
+                    connectTryTimes = 0;                    
                     mqtt_state = MQTT_MODE_SUBSCRIBE;
                     break;
 
@@ -147,16 +161,17 @@ void osTaskMqt(void *pParameters)
                     
                 } else {
                     transport_close();
-                    vTaskDelay(1000);
+                    vTaskDelay(500);
                     mqtt_state = MQTT_MODE_CONNECT;
                 }
                 break;
 
             case MQTT_MODE_SUBSCRIBE:
-                run_state = MQTT_MODE_SUBSCRIBE;            
+                run_state = STATE_SUBCRIBE;
+                debug("mqtt task: try to subcribe from mqtt server... \n");
+            
                 if (gFw5500LinkState == false) {  //! 时刻检测网线状态
-                    printf("apple: phy offline MQTT_MODE_SUBSCRIBE\n");
-                    vTaskDelay(5000);
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                     break;                    
                 }
@@ -183,45 +198,16 @@ void osTaskMqt(void *pParameters)
                 break;
             
             case MQTT_MODE_RUNNING:
-                run_state = STATE_RUNNING;            
+                run_state = STATE_RUNNING;
+            
                 if (gFw5500LinkState == false) {
-                    debug("apple: phy offline STATE_RUNNING\n");
-                    vTaskDelay(5000);
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                     break;
                 }
-                
-                uint8_t sr = getSn_SR(SOCK_TCPS);
-                if (sr == SOCK_CLOSED) {
-                    debug("socket: closed \n");
-                    mqtt_state = MQTT_MODE_CONNECT;
-                    break;
-                    
-                } else if (sr == SOCK_CLOSE_WAIT) {
-                    debug("socket: close wait \n");                    
-                    transport_close();
-                    mqtt_state = MQTT_MODE_CONNECT;
-                    break;
-                    
-                } else if (sr == SOCK_SYNSENT) {
-                    debug("socket: synsent \n");
-                    if (wait_connect_ack_times++ > 100) {
-                        wait_connect_ack_times = 0;
-                        transport_close();
-                        mqtt_state = MQTT_MODE_CONNECT;
-                    
-                    } else {
-                        vTaskDelay(1);
-                    }
-                    
-                    break;
-                    
-                } else {
-
-                }
 
                 //!  send pingreq(heartbeat) msg and check pingresp msg
-                if (xTaskGetTickCount() - currentTime >= MQTT_KEEP_ALIVE*1000) { 
+                if (xTaskGetTickCount() - currentTime >= MQTT_KEEP_ALIVE*500) { 
                     currentTime = xTaskGetTickCount(); 
                     mqtt_pingreq();
                     debug("send a heartbeat...........\n");
@@ -240,7 +226,7 @@ void osTaskMqt(void *pParameters)
                 mqtt_get_message(&flagMqttRunning);
                 if (flagMqttRunning == false) {
                     flagMqttRunning = true;
-                    mqtt_state = MQTT_MODE_ETHREBOOT;
+                    mqtt_state = MQTT_MODE_INIT;
                 }                               
                 break;
             
@@ -253,7 +239,7 @@ void osTaskMqt(void *pParameters)
     
         }
 
-        vTaskDelay(1);
+        vTaskDelay(2);
     }
 	   
 }

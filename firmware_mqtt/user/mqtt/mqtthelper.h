@@ -17,7 +17,7 @@
 #define TOPIC_ALARM         "TP_ALARM"
 #define TOPIC_ACK           "TP_ACK"
 
-#define MQTT_KEEP_ALIVE     1200 
+#define MQTT_KEEP_ALIVE     60000 
 
 bool transport_open(void);
 bool transport_close(void);
@@ -28,7 +28,6 @@ bool mqtt_connect(char* client_id, char* user, char* password);
 bool mqtt_subscrib(char* pTopic, int qos);
 bool mqtt_publish_buffer(char* pTopic, char *pMsg, uint16_t msg_len);
 
-bool mqtt_puback(unsigned short packetid);
 bool mqtt_pingreq(void);
 bool mqtt_disconnect(void);
 

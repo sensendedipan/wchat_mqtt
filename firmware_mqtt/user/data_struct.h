@@ -42,6 +42,7 @@ typedef enum
     STATE_DHCP,
     STATE_DNS,
     STATE_CONNECT,
+    STATE_SUBCRIBE,
     STATE_RUNNING
 
 } run_state_t;
