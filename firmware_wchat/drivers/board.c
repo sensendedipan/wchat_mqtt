@@ -13,9 +13,10 @@
 void boardInit(void)
 {   
     dwtInit();
+    iosInit();
     usart4Init();
     timer2Init();
-    biosInit();         //! basic input/output init
+    resetkeyInit();
     ledInit();
 	i2cEepromInit();    
 	spi2Init();         //! w5500   

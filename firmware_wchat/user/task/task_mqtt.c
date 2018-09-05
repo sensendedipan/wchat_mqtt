@@ -68,7 +68,7 @@ void osTaskMqt(void *pParameters)
                     mqtt_state = MQTT_MODE_DHCP; 
                     
                 } else {
-                    vTaskDelay(5000);
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                 }                
                 break;
@@ -76,7 +76,7 @@ void osTaskMqt(void *pParameters)
             case MQTT_MODE_DHCP:  //! 
                 run_state = STATE_DHCP;
                 if (gFw5500LinkState == false) {  //! Ê±¿Ì¼ì²âÍøÏß×´Ì¬
-                    vTaskDelay(5000);
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                     break;
                     
@@ -111,7 +111,7 @@ void osTaskMqt(void *pParameters)
             case MQTT_MODE_DNS:
                 run_state = STATE_DNS; 
                 if (gFw5500LinkState == false) {  //! Ê±¿Ì¼ì²âÍøÏß×´Ì¬
-                    vTaskDelay(5000);
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                     break;
                     
@@ -144,7 +144,7 @@ void osTaskMqt(void *pParameters)
                 flag_send_msg_handshake = false;
             
                 if (gFw5500LinkState == false) {  //! Ê±¿Ì¼ì²âÍøÏß×´Ì¬
-                    vTaskDelay(5000);
+                    vTaskDelay(2500);
                     mqtt_state = MQTT_MODE_PHY;
                     break;                    
                 } 
@@ -165,7 +165,7 @@ void osTaskMqt(void *pParameters)
                 
                 } else {
                     transport_close();
-                    vTaskDelay(2000);
+                    vTaskDelay(1000);
                     mqtt_state = MQTT_MODE_CONNECT;
                 }
                 break;

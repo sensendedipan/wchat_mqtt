@@ -7,7 +7,7 @@ static DMA_InitTypeDef DMA_InitStructureTx;
 static DMA_InitTypeDef DMA_InitStructureRx;
 
 static uint8_t RX_BUFFER[DMA_RX_BUFFER_SIZE];
-static uint8_t TX_BUFFER[DMA_TX_BUFFER_SIZE];
+
 
 /**
   * @brief  usart1 init/gprs
@@ -165,15 +165,15 @@ void usart1SendString(const uint8_t *s)
 
 void usart1DmaSendBuffer(const uint8_t *buffer, uint16_t count)  
 {  
-    DMA_Cmd(DMA_STREAM_TX, DISABLE);
-    DMA_DeInit(DMA_STREAM_TX); 
-    
-    memcpy(TX_BUFFER, buffer, count);
-    DMA_InitStructureTx.DMA_Memory0BaseAddr = (uint32_t)TX_BUFFER;
-    DMA_InitStructureTx.DMA_BufferSize = count;
-    DMA_Init(DMA_STREAM_TX, &DMA_InitStructureTx);
-    DMA_ITConfig(DMA_STREAM_TX, DMA_IT_TC, ENABLE);    
-    DMA_Cmd(DMA_STREAM_TX, ENABLE);  
+//    DMA_Cmd(DMA_STREAM_TX, DISABLE);
+//    DMA_DeInit(DMA_STREAM_TX); 
+//    
+//    memcpy(TX_BUFFER, buffer, count);
+//    DMA_InitStructureTx.DMA_Memory0BaseAddr = (uint32_t)TX_BUFFER;
+//    DMA_InitStructureTx.DMA_BufferSize = count;
+//    DMA_Init(DMA_STREAM_TX, &DMA_InitStructureTx);
+//    DMA_ITConfig(DMA_STREAM_TX, DMA_IT_TC, ENABLE);    
+//    DMA_Cmd(DMA_STREAM_TX, ENABLE);  
 } 
 
 

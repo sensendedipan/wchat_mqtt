@@ -12,7 +12,7 @@ void osTaskDog(void *pParameters)
 	static uint8_t resetKeyDelay = 0;
     static uint32_t phyOfflineCount = 0;
     const static uint32_t phyOfflineCountMax = 43200; //! about 6 hours
-    const static uint8_t resetKeyTimeout = 10;  //! means 5s
+    const static uint16_t resetKeyTimeout = 2500;  //! means 5s
     static volatile TickType_t currentTime;
     static volatile TickType_t currentTime_feed_dog;
     static uint8_t  buf_tcp_to_usart[2048]; 
@@ -37,7 +37,7 @@ void osTaskDog(void *pParameters)
 		}
 
         //! do state indicate base time is 2s
-        if (xTaskGetTickCount() - currentTime >= 2000) {//! about 2s
+        if (xTaskGetTickCount() - currentTime >= 1000) {//! about 2s
             currentTime = xTaskGetTickCount();
 
             switch(run_state) {                               
@@ -57,7 +57,8 @@ void osTaskDog(void *pParameters)
                     ledFlashSet(0, 2, 50, 150); //! 
                     break;
 
-                case STATE_RUNNING: 
+                case STATE_RUNNING:
+                    ledFlashSet(0, 1, 500, 500); //!                    
                     break;
                 
                 dafault:
@@ -65,11 +66,11 @@ void osTaskDog(void *pParameters)
                     break;
             }                              
 
-        } else if (xTaskGetTickCount() > 0XEFFFFFFF) {  //! 时间溢出
+        } else if (xTaskGetTickCount() > 0X12064200) {  //! 每周重启一次
             systemReboot(); 
         }
         
-        if (xTaskGetTickCount() - currentTime_feed_dog >= 500) {//! about 0.5s
+        if (xTaskGetTickCount() - currentTime_feed_dog >= 500) {//! about 1s
             currentTime_feed_dog = xTaskGetTickCount();
             wdgFeed(); //!	feed dog
             

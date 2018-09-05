@@ -27,7 +27,7 @@ int main(void)
 	boardInit();
 	osTaskCreate();	
 	vTaskStartScheduler();
-    
+    debug("error error error !!! \n");
 	systemReboot(); 	//! normally it can not be running into here
 	
 	while(1);	

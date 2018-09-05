@@ -3,7 +3,7 @@
 #include "board.h"
 #include "usart4_driver.h"
 
-
+//#define ENABLE_DEBUG_RX
 
 
 /**
@@ -23,8 +23,10 @@ void usart4Init(void)
 	RCC_APB1PeriphClockCmd(USART4_RCC_APB1Periph_USART4, ENABLE);
     
     GPIO_PinAFConfig(USART4_GPIO, USART4_GPIO_PIN_SOURCE_TX, GPIO_AF_UART4);
+#ifdef ENABLE_DEBUG_RX
     GPIO_PinAFConfig(USART4_GPIO, USART4_GPIO_PIN_SOURCE_RX, GPIO_AF_UART4);
-	
+#endif	
+    
 	GPIO_InitStructure.GPIO_Pin = USART4_GPIO_PIN_TX;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -32,32 +34,35 @@ void usart4Init(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;	
 	GPIO_Init(USART4_GPIO, &GPIO_InitStructure);
 
+#ifdef ENABLE_DEBUG_RX
 	GPIO_InitStructure.GPIO_Pin = USART4_GPIO_PIN_RX;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(USART4_GPIO, &GPIO_InitStructure);
-	
-	USART_InitStructure.USART_BaudRate = 115200;
+#endif
+
+	USART_InitStructure.USART_BaudRate = 921600;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+	USART_InitStructure.USART_Mode = USART_Mode_Tx;
 	USART_Init(USART4_USART, &USART_InitStructure);
     USART_GetFlagStatus(USART4_USART, USART_FLAG_TC); 
 	USART_ITConfig(USART4_USART, USART_IT_RXNE, ENABLE);
 	USART_Cmd(USART4_USART, ENABLE);
 	USART_ClearFlag(USART4_USART, USART_FLAG_TC);
-	
+
+#ifdef ENABLE_DEBUG_RX
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	NVIC_InitStructure.NVIC_IRQChannel = USART4_USART_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 10;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);  
-	
+#endif	
 }
  
 
@@ -86,28 +91,28 @@ void usart4SendBuffer(const uint8_t *buffer, uint16_t count)
 }
 
 
-
-//void USART4_USART_IRQHandler() 
-//{
-//	uint8_t data;
-//	if (USART_GetITStatus(USART4_USART, USART_IT_RXNE) != RESET) { 
-//		data = USART_ReceiveData(USART4_USART);
-//	}
-//}
-
+#ifdef ENABLE_DEBUG_RX
+void USART4_USART_IRQHandler() 
+{
+	uint8_t data;
+	if (USART_GetITStatus(USART4_USART, USART_IT_RXNE) != RESET) { 
+		data = USART_ReceiveData(USART4_USART);
+	}
+}
+#endif
 
 /**
   * @brief  use usrt4 as printf() 
   * @note
   */
-#if 1
+
 int fputc(int ch, FILE *f)
 {
     USART_SendData(USART4_USART, (unsigned char) ch);  
     while (USART_GetFlagStatus(USART4_USART, USART_FLAG_TC) == RESET){} 
 	return (ch);
 } 
-#endif
+
 
  
  
